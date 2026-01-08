@@ -290,13 +290,19 @@
                 </div>
             </div>
         </div>
+
+        <div style="margin-top: 16px; text-align: right;">
+            <button type="submit" style="padding: 10px 18px; border-radius: 4px; border: none; background: #4caf50; color: #fff; font-size: 14px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                Send Order on WhatsApp
+            </button>
+        </div>
     </form>
 
     <div class="total">
         Total: ₹<span id="totalAmount">0</span>
     </div>
     <div class="footer-note">
-        Select items and adjust quantity to see the total.
+        Select items and adjust quantity to see the total and then send it on WhatsApp.
     </div>
     </div>
 
@@ -336,6 +342,42 @@
                 qtySpan.textContent = next;
                 updateTotal();
             }
+        });
+
+        document.getElementById("menuForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const items = document.querySelectorAll(".menu-item");
+            const lines = [];
+
+            items.forEach((item) => {
+                const nameEl = item.querySelector(".menu-item-name");
+                const qtySpan = item.querySelector(".qty-value");
+                if (!nameEl || !qtySpan) return;
+
+                const qty = parseInt(qtySpan.textContent, 10) || 0;
+                if (qty > 0) {
+                    const price = parseFloat(item.getAttribute("data-price")) || 0;
+                    const lineTotal = price * qty;
+                    lines.push(`${nameEl.textContent.trim()} x ${qty} = ₹${lineTotal.toFixed(2)}`);
+                }
+            });
+
+            const total = document.getElementById("totalAmount").textContent || "0";
+
+            if (lines.length === 0) {
+                alert("Please select at least one item before sending the order.");
+                return;
+            }
+
+            let message = "New order:%0A";
+            message += lines.join("%0A");
+            message += `%0A%0ATotal: ₹${total}`;
+
+            const phoneNumber = "919372436526"; // WhatsApp number in international format without +
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+
+            window.open(whatsappUrl, "_blank");
         });
     </script>
 </body>
