@@ -157,6 +157,28 @@
         <h1>Restaurant Menu</h1>
     </div>
 
+    <div style="margin: 10px 0 16px 0; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+            <input
+                id="customerName"
+                type="text"
+                placeholder="Your name"
+                required
+                style="padding: 6px 8px; border-radius: 4px; border: 1px solid #ccc; min-width: 160px;"
+            />
+            <input
+                id="customerMobile"
+                type="tel"
+                placeholder="Your mobile number"
+                required
+                pattern="^[6-9][0-9]{9}$"
+                title="Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9."
+                style="padding: 6px 8px; border-radius: 4px; border: 1px solid #ccc; min-width: 160px;"
+            />
+        </div>
+        <div id="orderHeaderInfo" style="font-size: 14px; font-weight: 500; color: #333;"></div>
+    </div>
+
     <form id="menuForm">
         <!-- Starters -->
         <div class="menu-section">
@@ -325,6 +347,27 @@
             document.getElementById("totalAmount").textContent = total.toFixed(2);
         }
 
+        function updateOrderHeaderInfo() {
+            const name = (document.getElementById("customerName").value || "").trim();
+            const mobile = (document.getElementById("customerMobile").value || "").trim();
+            const infoEl = document.getElementById("orderHeaderInfo");
+
+            if (!name && !mobile) {
+                infoEl.textContent = "";
+                return;
+            }
+
+            let text = "Order for";
+            if (name) {
+                text += `: ${name}`;
+            }
+            if (mobile) {
+                text += name ? `  ${mobile}` : `: ${mobile}`;
+            }
+
+            infoEl.textContent = text;
+        }
+
         document.addEventListener("click", (event) => {
             if (event.target.classList.contains("btn-plus") || event.target.classList.contains("btn-minus")) {
                 const item = event.target.closest(".menu-item");
@@ -344,8 +387,25 @@
             }
         });
 
+        document.getElementById("customerName").addEventListener("input", updateOrderHeaderInfo);
+        document.getElementById("customerMobile").addEventListener("input", updateOrderHeaderInfo);
+
         document.getElementById("menuForm").addEventListener("submit", function (event) {
             event.preventDefault();
+
+            const name = (document.getElementById("customerName").value || "").trim();
+            const mobile = (document.getElementById("customerMobile").value || "").trim();
+
+            if (!name || !mobile) {
+                alert("Please enter your name and mobile number before sending the order.");
+                return;
+            }
+
+            const mobilePattern = /^[6-9][0-9]{9}$/;
+            if (!mobilePattern.test(mobile)) {
+                alert("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.");
+                return;
+            }
 
             const items = document.querySelectorAll(".menu-item");
             const lines = [];
@@ -370,11 +430,11 @@
                 return;
             }
 
-            let message = "New order:%0A";
+            let message = `Customer: ${name}%0AMobile: ${mobile}%0A%0AOrder:%0A`;
             message += lines.join("%0A");
             message += `%0A%0ATotal: ₹${total}`;
 
-            const phoneNumber = "919372436526"; // WhatsApp number in international format without +
+            const phoneNumber = "911234567890"; // WhatsApp number in international format without +
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
 
             window.open(whatsappUrl, "_blank");
